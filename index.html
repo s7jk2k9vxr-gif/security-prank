@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Security Alert (Just Kidding)</title>
+
+<style>
+  :root{
+    --bg:#0b0b0b;
+    --white:#f5f5f5;
+    --red:#ff5757;
+    --accent:#9cffc3;
+  }
+  html,body{height:100%;margin:0;font-family:Inter, system-ui, Arial, sans-serif;background:var(--bg);color:var(--white);}
+  .stage{display:flex;align-items:center;justify-content:center;height:100%;position:relative;overflow:hidden;}
+  .card{width:92%;max-width:900px;padding:36px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));box-shadow:0 10px 30px rgba(0,0,0,0.6);text-align:center;transition:transform .25s ease, filter .25s ease;}
+  .alert{color:var(--red);font-weight:800;font-size:40px;letter-spacing:1px;margin:8px 0;}
+  .sub{font-size:18px;opacity:0.9;margin-bottom:20px;}
+  .details{background:rgba(255,255,255,0.03);padding:18px;border-radius:10px;margin:18px 0;text-align:left;font-family:monospace;}
+  .btn{display:inline-block;margin-top:18px;padding:10px 18px;border-radius:999px;background:var(--accent);color:#002200;text-decoration:none;font-weight:700;}
+  /* fullscreen reveal */
+  .revealScreen{display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%;position:absolute;left:0;top:0;background:linear-gradient(135deg,#fffaf0,#e8ffe8);color:#0b0b0b;padding:30px;box-sizing:border-box;z-index:2;}
+  .revealScreen h1{font-size:48px;margin:6px 0;}
+  .revealScreen p{font-size:18px;margin:6px 0 18px;}
+  .from{margin-top:10px;font-size:14px;opacity:0.8;}
+  /* confetti */
+  .confetti-piece{position:absolute;width:10px;height:14px;opacity:0;transform-origin:center;will-change:transform,opacity;z-index:3}
+  /* small screens */
+  @media (max-width:420px){
+    .alert{font-size:28px}
+    .card{padding:22px}
+    .revealScreen h1{font-size:32px}
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="card" id="card">
+    <div class="alert" id="alertText">! IMPORTANT SECURITY ALERT !</div>
+    <div class="sub" id="subText">Unusual activity detected. Device connection compromised.</div>
+
+    <div class="details" id="details">
+      <div><strong>Scope:</strong> Access to messages, photos, and accounts — possible remote observation.</div>
+      <div style="margin-top:8px;"><strong>Action:</strong> Disconnect from networks and contact support immediately.</div>
+    </div>
+
+    <div style="opacity:0.85;font-size:13px">This message will refresh shortly while we gather system status...</div>
+  </div>
+
+  <div class="revealScreen" id="reveal">
+    <h1>JUST KIDDING — PRANK!</h1>
+    <p>This was only a joke. Nothing on your phone has been accessed.</p>
+    <div class="from">— From: Your friendly prankster</div>
+    <a class="btn" id="closeBtn" href="#">LOL</a>
+  </div>
+</div>
+
+<script>
+  // Show initial scary state for a few seconds then reveal the prank
+  const revealDelay = 4000; // ms
+  const subText = document.getElementById('subText');
+  const card = document.getElementById('card');
+  const reveal = document.getElementById('reveal');
+  const closeBtn = document.getElementById('closeBtn');
+
+  // small flicker/typing feel
+  let dots = 0;
+  const dotInterval = setInterval(()=>{
+    dots = (dots+1)%4;
+    if (subText) subText.textContent = 'Unusual activity detected. Device connection compromised' + '.'.repeat(dots);
+  }, 500);
+
+  setTimeout(()=>{
+    clearInterval(dotInterval);
+    // Reveal prank
+    card.style.filter = 'blur(2px)';
+    card.style.transform = 'scale(0.98)';
+    reveal.style.display = 'flex';
+    startConfetti();
+  }, revealDelay);
+
+  closeBtn.addEventListener('click', (e)=>{
+    e.preventDefault();
+    stopConfetti();
+    reveal.innerHTML = `
+      <h1>All good! 🎉</h1>
+      <p>This was just a prank screen.</p>
+      <a class="btn" href="#" id="againBtn">Run again</a>
+    `;
+    const againBtn = document.getElementById('againBtn');
+    if (againBtn){
+      againBtn.addEventListener('click', (e2)=>{
+        e2.preventDefault();
+        location.reload();
+      });
+    }
+  });
+
+  // Simple confetti (creates pieces and animates)
+  let confettiTimer = null;
+  function startConfetti(){
+    const colors = ['#ff3b30','#ff9500','#ffd60a','#32d74b','#5ac8fa','#5856d6'];
+    const count = 45;
+    const stage = document.body;
+    for(let i=0;i<count;i++){
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left = Math.random()*100 + 'vw';
+      el.style.top = (Math.random()*20)+'vh';
+      el.style.background = colors[i % colors.length];
+      el.style.transform = 'rotate('+Math.random()*360+'deg)';
+      el.style.opacity = '1';
+      el.style.width = (6+Math.random()*12)+'px';
+      el.style.height = (8+Math.random()*18)+'px';
+      stage.appendChild(el);
+      el.animate([
+        {transform: `translateY(-10vh) rotate(${Math.random()*360}deg)`, opacity:1},
+        {transform: `translateY(${70+Math.random()*50}vh) rotate(${Math.random()*720}deg)`, opacity:0.8}
+      ], {duration: 2200 + Math.random()*1800, iterations:1, delay: Math.random()*600, easing:'cubic-bezier(.15,.9,.4,1)'});
+      setTimeout(()=>{ el.remove(); }, 5000 + Math.random()*2000);
+    }
+    confettiTimer = setInterval(()=>{
+      for(let i=0;i<8;i++){
+        const el = document.createElement('div');
+        el.className = 'confetti-piece';
+        el.style.left = Math.random()*100 + 'vw';
+        el.style.top = '-5vh';
+        el.style.background = colors[Math.floor(Math.random()*colors.length)];
+        el.style.width = (6+Math.random()*12)+'px';
+        el.style.height = (8+Math.random()*18)+'px';
+        document.body.appendChild(el);
+        el.animate([
+          {transform: 'translateY(0vh) rotate(0deg)', opacity:1},
+          {transform: `translateY(${80+Math.random()*40}vh) rotate(${Math.random()*720}deg)`, opacity:0}
+        ], {duration: 2000 + Math.random()*2000, iterations:1, easing:'cubic-bezier(.2,.8,.3,1)'});
+        setTimeout(()=>el.remove(), 5000);
+      }
+    }, 400);
+    setTimeout(stopConfetti, 6000);
+  }
+  function stopConfetti(){
+    if(confettiTimer){ clearInterval(confettiTimer); confettiTimer = null; }
+    document.querySelectorAll('.confetti-piece').forEach(n=>n.remove());
+  }
+</script>
+</body>
+</html>
