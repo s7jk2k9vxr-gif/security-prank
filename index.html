@@ -15,7 +15,7 @@
   html,body{height:100%;margin:0;font-family:Inter, system-ui, Arial, sans-serif;background:var(--bg);color:var(--white);}
   .stage{display:flex;align-items:center;justify-content:center;height:100%;position:relative;overflow:hidden;}
   .card{width:92%;max-width:900px;padding:36px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));box-shadow:0 10px 30px rgba(0,0,0,0.6);text-align:center;transition:transform .25s ease, filter .25s ease;}
-  .alert{color:var(--red);font-weight:800;font-size:40px;letter-spacing:1px;margin:8px 0;}
+  .alert{color:var(--red);font-weight:800;font-size:40px;letter-spacing:1px;margin:8px 0;text-shadow:0 0 10px rgba(255,0,0,0.7);}
   .sub{font-size:18px;opacity:0.9;margin-bottom:20px;}
   .details{background:rgba(255,255,255,0.03);padding:18px;border-radius:10px;margin:18px 0;text-align:left;font-family:monospace;}
   .btn{display:inline-block;margin-top:18px;padding:10px 18px;border-radius:999px;background:var(--accent);color:#002200;text-decoration:none;font-weight:700;}
@@ -24,9 +24,7 @@
   .revealScreen h1{font-size:48px;margin:6px 0;}
   .revealScreen p{font-size:18px;margin:6px 0 18px;}
   .from{margin-top:10px;font-size:14px;opacity:0.8;}
-  /* confetti */
   .confetti-piece{position:absolute;width:10px;height:14px;opacity:0;transform-origin:center;will-change:transform,opacity;z-index:3}
-  /* small screens */
   @media (max-width:420px){
     .alert{font-size:28px}
     .card{padding:22px}
@@ -39,12 +37,10 @@
   <div class="card" id="card">
     <div class="alert" id="alertText">! IMPORTANT SECURITY ALERT !</div>
     <div class="sub" id="subText">Unusual activity detected. Device connection compromised.</div>
-
     <div class="details" id="details">
       <div><strong>Scope:</strong> Access to messages, photos, and accounts — possible remote observation.</div>
       <div style="margin-top:8px;"><strong>Action:</strong> Disconnect from networks and contact support immediately.</div>
     </div>
-
     <div style="opacity:0.85;font-size:13px">This message will refresh shortly while we gather system status...</div>
   </div>
 
@@ -57,23 +53,32 @@
 </div>
 
 <script>
-  // Show initial scary state for a few seconds then reveal the prank
-  const revealDelay = 4000; // ms
+  // Show initial scary state for 10 seconds
+  const revealDelay = 10000; // milliseconds (10 seconds)
+  const alertText = document.getElementById('alertText');
   const subText = document.getElementById('subText');
   const card = document.getElementById('card');
   const reveal = document.getElementById('reveal');
   const closeBtn = document.getElementById('closeBtn');
 
-  // small flicker/typing feel
+  // Typing dots animation
   let dots = 0;
   const dotInterval = setInterval(()=>{
     dots = (dots+1)%4;
-    if (subText) subText.textContent = 'Unusual activity detected. Device connection compromised' + '.'.repeat(dots);
+    subText.textContent = 'Unusual activity detected. Device connection compromised' + '.'.repeat(dots);
   }, 500);
 
+  // Flicker effect (random flashes on alert text)
+  const flickerInterval = setInterval(()=>{
+    const visible = Math.random() > 0.3;
+    alertText.style.opacity = visible ? '1' : Math.random().toFixed(2);
+    alertText.style.textShadow = visible ? '0 0 10px rgba(255,0,0,0.7)' : '0 0 2px rgba(255,0,0,0.3)';
+  }, 150);
+
+  // Reveal prank after delay
   setTimeout(()=>{
     clearInterval(dotInterval);
-    // Reveal prank
+    clearInterval(flickerInterval);
     card.style.filter = 'blur(2px)';
     card.style.transform = 'scale(0.98)';
     reveal.style.display = 'flex';
@@ -89,15 +94,13 @@
       <a class="btn" href="#" id="againBtn">Run again</a>
     `;
     const againBtn = document.getElementById('againBtn');
-    if (againBtn){
-      againBtn.addEventListener('click', (e2)=>{
-        e2.preventDefault();
-        location.reload();
-      });
-    }
+    againBtn.addEventListener('click', (e2)=>{
+      e2.preventDefault();
+      location.reload();
+    });
   });
 
-  // Simple confetti (creates pieces and animates)
+  // Simple confetti animation
   let confettiTimer = null;
   function startConfetti(){
     const colors = ['#ff3b30','#ff9500','#ffd60a','#32d74b','#5ac8fa','#5856d6'];
